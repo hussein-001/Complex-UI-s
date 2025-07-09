@@ -16,7 +16,7 @@ struct CategoryCell: View {
             .font(.callout)
             .frame(minWidth: 35)
             .padding(.vertical,8)
-            .padding(.horizontal,11)
+            .padding(.horizontal,10)
             .themeColors(isSelected: isSelected)
             .clipShape(Capsule())
     }
