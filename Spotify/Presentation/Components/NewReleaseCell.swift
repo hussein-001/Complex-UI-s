@@ -61,6 +61,8 @@ struct NewReleaseCell: View {
                             }
                         }
                         .font(.callout)
+                        .padding(.top,4)
+                        
                         HStack {
                             Image(systemName: "plus.circle")
                                 .foregroundStyle(.spotifyLightGray)

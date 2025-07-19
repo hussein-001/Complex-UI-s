@@ -20,36 +20,38 @@ struct SpotifyHomeView: View {
     ]
     
     var body: some View {
-        ZStack {
-            Color.spotifyBlack.ignoresSafeArea()
-            
-            ScrollView(.vertical) {
-                LazyVStack(alignment: .center, spacing: 20, pinnedViews: .sectionHeaders) {
-                    Section {
-                        VStack(spacing: 16) {
-                            recentSection
-                                .padding(.horizontal, 16)
-                            if let product = products.first {
-                                newReleaseSection(product: product)
+        NavigationStack {
+            ZStack {
+                Color.spotifyBlack.ignoresSafeArea()
+                
+                ScrollView(.vertical) {
+                    LazyVStack(alignment: .center, spacing: 20, pinnedViews: .sectionHeaders) {
+                        Section {
+                            VStack(spacing: 16) {
+                                recentSection
                                     .padding(.horizontal, 16)
+                                if let product = products.first {
+                                    newReleaseSection(product: product)
+                                        .padding(.horizontal, 16)
+                                }
+                                
+                                listRows
+                                
                             }
-                            
-                            listRows
-
+                        } header: {
+                            header
                         }
-                    } header: {
-                        header
                     }
                 }
+                .scrollIndicators(.hidden)
+                .clipped()
+                
             }
-            .scrollIndicators(.hidden)
-            .clipped()
-            
-        }
-        .task {
-            await getUser()
-            await getProduct()
-            await getProductRow()
+            .task {
+                await getUser()
+                await getProduct()
+                await getProductRow()
+            }
         }
     }
     
@@ -63,6 +65,7 @@ struct SpotifyHomeView: View {
     }
     
     private  func getProduct() async {
+        guard products.isEmpty else { return }
         do {
             products = try await Array(Database().getProducts().prefix(upTo: 8))
         } catch {
@@ -71,6 +74,7 @@ struct SpotifyHomeView: View {
     }
     
     private  func getProductRow() async {
+        guard productRows.isEmpty else { return }
         do {
             var rows: [ProductRow] = []
             let allBrands = Set(products.map( {$0.brand }))
@@ -79,8 +83,6 @@ struct SpotifyHomeView: View {
                 rows.append(ProductRow(title: brand?.capitalized, products: products))
             }
             productRows = rows
-        } catch {
-            
         }
     }
     
@@ -124,28 +126,29 @@ struct SpotifyHomeView: View {
     private var recentSection: some View {
         LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
             ForEach(products) { product in
-                ProductCell(
-                    imageName: product.firstImage,
-                    title: product.title
-                )
-                .onTapGesture {
-                    
+                NavigationLink(destination: SpotifyPlaylistView(product: product)) {
+                    ProductCell(
+                        imageName: product.firstImage,
+                        title: product.title
+                    )
                 }
             }
         }
     }
     
     private func newReleaseSection(product: Product) -> some View {
-        NewReleaseCell(
-            imageName: product.firstImage,
-            headline: product.brand,
-            subheadline: product.category,
-            title: product.title,
-            subtitle: product.description) {
-                
-            } onPlayPressed: {
-                
-            }
+        NavigationLink(destination: SpotifyPlaylistView(product: product)) {
+            NewReleaseCell(
+                imageName: product.firstImage,
+                headline: product.brand,
+                subheadline: product.category,
+                title: product.title,
+                subtitle: product.description) {
+                    
+                } onPlayPressed: {
+                    
+                }
+        }
     }
     
     private var listRows: some View {
@@ -161,13 +164,12 @@ struct SpotifyHomeView: View {
                 ScrollView(.horizontal) {
                     HStack(alignment: .top,spacing: 16) {
                         ForEach(row.products) { product in
-                            ImageTitleRowCell(
-                                title: product.title,
-                                imageName: product.firstImage,
-                                imageSize: 120
-                            )
-                            .onTapGesture {
-                                
+                            NavigationLink(destination: SpotifyPlaylistView(product: product)) {
+                                ImageTitleRowCell(
+                                    title: product.title,
+                                    imageName: product.firstImage,
+                                    imageSize: 120
+                                )
                             }
                         }
                     }
@@ -180,5 +182,7 @@ struct SpotifyHomeView: View {
 }
 
 #Preview {
-    SpotifyHomeView()
+    NavigationStack {
+        SpotifyHomeView()
+    }
 }

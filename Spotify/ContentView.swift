@@ -13,27 +13,33 @@ struct ContentView: View {
     @State private var products: [Product] = []
     
     var body: some View {
-        ScrollView {
-            VStack {
-                ForEach(products) { product in
-                    Text(product.title)
-                }
-            }
+        
+        NavigationStack {
+            SpotifyHomeView()
         }
-        .padding()
-        .task {
-            await getData()
-        }
-    }
-    
-    private func getData() async  {
-        do {
-            users = try await Database().getUsers()
-            products = try await Database().getProducts()
-            print(users.count)
-        } catch {
-            
-        }
+        //        ScrollView {
+        //            VStack {
+        //                ForEach(products) { product in
+        //                    Text(product.title)
+        //                }
+        //            }
+        //        }
+        //        .padding()
+        //        .task {
+        //            await getData()
+        //        }
+        //    }
+        //
+        //    private func getData() async  {
+        //        do {
+        //            users = try await Database().getUsers()
+        //            products = try await Database().getProducts()
+        //            print(users.count)
+        //        } catch {
+        //
+        //        }
+        //    }
+        //}
     }
 }
 
